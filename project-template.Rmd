@@ -44,7 +44,7 @@ Based on these data, the managers of \textsc{rcyc} can make an informed decision
  - for instance, if there is a correlation between age and spending, the managers can decide whether to focus efforts on retaining old members or recruiting new members, depending on the trend. 
 
 ## Statistical methods
-To analyze the relationship, we use a linear regression model with two interacting predictors. We assume the conditions---linearity of relation, constance of variance, independence of observation, and normality of residuals. Also, we create a column called `total_spending`---the sum of the separate accounts---and filter for 2017 values.
+To analyze the relationship, we use a linear regression model with two interacting predictors. We assume the conditions---linearity of relation, constancy of variance, independence of observation, and normality of residuals. Also, we create a column called `total_spending`---the sum of the separate accounts---and filter for 2017 values.
 
 ### Model 
 \[y_i = \beta_0 + \beta_1 x_{1i} + \beta_2x_{2i} + \beta_3x_{1i}x_{2i} + \varepsilon_i \]
@@ -62,8 +62,8 @@ augmented_rcyc <- RCYC %>%
   select(Age, Sex, total_spending)  # since we don't need more
 
 augmented_rcyc %>% ggplot(aes(x=Age, y=total_spending, color=Sex)) +  # plot the data where total_spending ~ Age * Sex
-  geom_point(alpha=0.2) + 
-  geom_smooth(formula = y ~ x, method="lm", se=FALSE) +
+  geom_point(alpha=0.2) +  # easier to see lines
+  geom_smooth(formula = y ~ x, method="lm", se=FALSE) + 
   labs(x="Age", y="Total spending")
 
 # model <- lm(total_spending ~ Age, data=augmented_rcyc)
@@ -81,6 +81,19 @@ augmented_rcyc %>% ggplot(aes(x=Age, y=total_spending, color=Sex)) +  # plot the
 # model <- lm(total_spending ~ Age * Sex, data=augmented_rcyc)
 # summary(model)$r.squared
 ```
+
+
+## Results
+We obtain the following:
+
+| predictor   | \(R^2\)      | \(p\)-value  |
+|-------------|--------------|--------------|
+| Age         | 0.0001070233 | 7.503991e-01 |
+| Sex         | 0.005616849  | 2.101313e-02 |
+| Age and Sex | 0.00607189   | 7.033530e-01 |
+With this low of \(R^2\) and this high of \(p\)-values, we see that the linear relationship is extremely weak and further fail to reject the null hypothesis. Thus, we do not have sufficient evidence to conclude that at least one of Age or Sex can predict the total spending. In simple terms, **there most likely is not a correlation between age or sex and spending.**
+
+Note: we see some interesting data points for members in their mid-forties---just when midlife crises begin. Purely speculatively---as we would need more analyses to come to a conclusion---the club may wish to advertise more to those of middle-age.
 
 <!-- This document shows a few basics on making slides with R markdown. -->
 

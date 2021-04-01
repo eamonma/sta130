@@ -1,0 +1,65 @@
+
+## Question 1
+**What is the correlation between a member's age and sex and the total amount they spent at RCYC facilities?**
+\textbf{Motivation}: our goal is to help better adapt \textsc{rcyc}`s facilities to the members' needs. Then, the first research question...
+
+- explores whether age, sex, or both can predict a member's spending
+- can reveal interesting patterns in spending
+
+### How does this help?
+Based on these data, the managers of \textsc{rcyc} can make an informed decision on which facilities to invest in more
+
+- perhaps in combination with other available, external data, such as an age group's preferred activities.
+- for instance, if there is a correlation between age and spending, the managers can decide whether to focus efforts on retaining old members or recruiting new members, depending on the trend.
+
+## Statistical methods
+To analyze the relationship, we use a linear regression model with two interacting predictors. We assume the conditions---linearity of relation, constancy of variance, independence of observation, and normality of residuals. Also, we create a column called `total_spending`---the sum of the separate accounts---and filter for 2017 values.
+
+### Model
+\[y_i = \beta_0 + \beta_1 x_{1i} + \beta_2x_{2i} + \beta_3x_{1i}x_{2i} + \varepsilon_i \]
+Where \(y_i\) is the predicted total spending in 2017, \(x_{1i}\) is the age of the member, \(x_{2i}\) is the sex of the member---where \(0\) is female and \(1\) is male.
+
+### Hypotheses
+Let \(\alpha = 0.05\). \[H_0 : \beta_1 = \beta_2 = \beta_3 = 0 \qquad H_A: \text{at least one } \beta_i \neq 0\]
+In simple terms, unless the data shows otherwise, we expect that there is no linear relationship between age and spending or sex and spending.
+
+---
+```{r fig.cap="\\label{fig:asspending} Relationship between member's age, sex, and total spending (2017)", fig.width=6.3, fig.height=4.5}
+augmented_rcyc <- RCYC %>% 
+mutate(total_spending = city_dining + island_dining + bar_spending + other_spending) %>%  # create a new variable containing total spending
+filter(year == 2017 & !is.na(Age) & !is.na(Sex) & !is.na(other_spending)) %>%  # filter the data such that only entries from 2017, and contains information, are included
+select(Age, Sex, total_spending)  # since we don't need more
+
+augmented_rcyc %>% ggplot(aes(x=Age, y=total_spending, color=Sex)) +  # plot the data where total_spending ~ Age * Sex
+geom_point(alpha=0.2) +  # easier to see lines
+geom_smooth(formula = y ~ x, method="lm", se=FALSE) +
+labs(x="Age", y="Total spending")
+
+# model <- lm(total_spending ~ Age, data=augmented_rcyc)
+# summary(model)$coefficients
+    # model <- lm(total_spending ~ Sex, data=augmented_rcyc)
+    # summary(model)$coefficients
+# model <- lm(total_spending ~ Age * Sex, data=augmented_rcyc)
+# summary(model)$coefficients
+    #
+    #
+    # model <- lm(total_spending ~ Age, data=augmented_rcyc)
+    # summary(model)$r.squared
+# model <- lm(total_spending ~ Sex, data=augmented_rcyc)
+# summary(model)$r.squared
+    # model <- lm(total_spending ~ Age * Sex, data=augmented_rcyc)
+    # summary(model)$r.squared
+```
+
+
+## Results
+We obtain the following:
+
+| predictor   | \(R^2\)      | \(p\)-value  |
+|-------------|--------------|--------------|
+| Age         | 0.0001070233 | 7.503991e-01 |
+| Sex         | 0.005616849  | 2.101313e-02 |
+| Age and Sex | 0.00607189   | 7.033530e-01 |
+With this low of \(R^2\) and this high of \(p\)-values, we see that the linear relationship is extremely weak and further fail to reject the null hypothesis. Thus, we do not have sufficient evidence to conclude that at least one of Age or Sex can predict the total spending. In simple terms, **there most likely is not a correlation between age or sex and spending.**
+
+Note: we see some interesting data points for members in their mid-forties---just when midlife crises begin. Purely speculatively---as we would need more analyses to come to a conclusion---the club may wish to advertise more to those of middle-age.
